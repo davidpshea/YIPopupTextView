@@ -1,23 +1,23 @@
 //
-//  SSTextView.m
+//  YISSTextView.m
 //  SSToolkit
 //
 //  Created by Sam Soffes on 8/18/10.
 //  Copyright 2010-2011 Sam Soffes. All rights reserved.
 //
 
-#import "SSTextView.h"
+#import "YISSTextView.h"
 
 #define IS_ARC              (__has_feature(objc_arc))
 
 
-@interface SSTextView (PrivateMethods)
+@interface YISSTextView (PrivateMethods)
 - (void)_updateShouldDrawPlaceholder;
 - (void)_textChanged:(NSNotification *)notification;
 @end
 
 
-@implementation SSTextView
+@implementation YISSTextView
 
 #pragma mark -
 #pragma mark Accessors
@@ -80,7 +80,18 @@
 	
 	if (_shouldDrawPlaceholder) {
 		[_placeholderColor set];
-		[_placeholder drawInRect:CGRectMake(8.0f, 8.0f, self.frame.size.width - 16.0f, self.frame.size.height - 16.0f) withFont:self.font];
+		CGRect drawInRect = CGRectMake(8.0f, 8.0f, self.frame.size.width - 16.0f, self.frame.size.height - 16.0f);
+#if (__IPHONE_OS_VERSION_MAX_ALLOWED < __IPHONE_7_0)
+		[_placeholder drawInRect:drawInRect withFont:self.font];
+#else
+		NSMutableParagraphStyle *paragraphStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
+		paragraphStyle.lineBreakMode = NSLineBreakByWordWrapping;
+		paragraphStyle.alignment = NSTextAlignmentLeft;
+		NSDictionary *attributes = @{ NSFontAttributeName: self.font,
+                                      NSForegroundColorAttributeName: self.placeholderColor,
+                                      NSParagraphStyleAttributeName: paragraphStyle };
+		[_placeholder drawInRect:drawInRect withAttributes:attributes];
+#endif
 	}
 }
 
